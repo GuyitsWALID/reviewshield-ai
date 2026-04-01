@@ -12,39 +12,41 @@ import {
   MessageSquare,
   CheckCircle2,
   ArrowRight,
-  Star,
+  Sparkles,
+  Radar,
+  Zap,
 } from "lucide-react";
 
 const features = [
   {
     icon: Brain,
     title: "AI Detection Engine",
-    description: "Hybrid AI analyzes reviews using rules + BERT + behavioral patterns",
+    description: "Hybrid AI analyzes reviews using rules + BERT + behavioral patterns.",
   },
   {
     icon: FileText,
     title: "Evidence Package Generator",
-    description: "Auto-generate PDF reports with proof for Google removal requests",
+    description: "Auto-generate PDF reports with proof for Google removal requests.",
   },
   {
     icon: Bell,
     title: "Real-Time Alerts",
-    description: "Get instant notifications when suspicious reviews appear",
+    description: "Get instant notifications when suspicious reviews appear.",
   },
   {
     icon: Globe,
     title: "Multi-Platform Monitoring",
-    description: "Monitor Google, Yelp, and Facebook from one dashboard",
+    description: "Monitor Google, Yelp, and Facebook from one dashboard.",
   },
   {
     icon: BarChart3,
     title: "Transparent Scoring",
-    description: "See exactly why each review was flagged with confidence scores",
+    description: "See exactly why each review was flagged with confidence scores.",
   },
   {
     icon: MessageSquare,
     title: "Smart Responses",
-    description: "AI-generated reply suggestions for every review",
+    description: "AI-generated response suggestions for every review.",
   },
 ];
 
@@ -54,12 +56,7 @@ const pricing = [
     price: "$0",
     period: "/mo",
     description: "Perfect for getting started",
-    features: [
-      "1 location",
-      "50 scans/month",
-      "Basic rules detection",
-      "Email support",
-    ],
+    features: ["1 location", "50 scans/month", "Basic rules detection", "Email support"],
     cta: "Get Started",
     popular: false,
   },
@@ -74,7 +71,7 @@ const pricing = [
       "Full AI detection",
       "Real-time alerts",
       "Evidence packages",
-      "Priority email support",
+      "Priority support",
     ],
     cta: "Start Free Trial",
     popular: true,
@@ -84,202 +81,173 @@ const pricing = [
     price: "$49",
     period: "/mo",
     description: "For growing businesses",
-    features: [
-      "Unlimited locations",
-      "GNN detection",
-      "API access",
-      "Team collaboration",
-      "Custom rules",
-      "24/7 phone support",
-    ],
+    features: ["Unlimited locations", "API access", "Team collaboration", "Custom rules", "24/7 support"],
     cta: "Start Free Trial",
     popular: false,
   },
 ];
 
-const trustLogos = [
-  "Google", "Yelp", "Facebook", "Trustpilot", "G2"
-];
+const trustLogos = ["Google", "Yelp", "Facebook", "Trustpilot", "G2"];
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#d2f4ea_0%,#f7fffc_30%,#fff7ef_65%,#ffffff_100%)]">
+      <header className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center">
-              <Shield className="w-5 h-5 text-primary-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600">
+              <Shield className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold text-foreground">ReviewShield</span>
           </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</a>
-            <a href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-            <a href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
+          <nav className="hidden items-center gap-8 md:flex">
+            <a href="#features" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">Features</a>
+            <a href="#pricing" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">Pricing</a>
+            <a href="#how-it-works" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">How It Works</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/sign-in" className="text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-2 transition-colors">
-              Sign In
-            </Link>
-            <Link href="/sign-up" className="inline-flex items-center justify-center rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 transition-all hover:scale-[1.02]">
-              Get Started
-            </Link>
+            <Button variant="ghost" className="hidden sm:inline-flex">
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
+            <Button className="bg-emerald-600 text-white hover:bg-emerald-700">
+              <Link href="/sign-up">Get Started</Link>
+            </Button>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-orange-50/30" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(37,99,235,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(37,99,235,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
-        <div className="max-w-7xl mx-auto relative">
-          <div className="max-w-3xl mx-auto text-center">
-            <Badge className="mb-6 bg-blue-50 text-blue-700 hover:bg-blue-50 border-0">
-              <Star className="w-3 h-3 mr-1" />
-              AI-Powered Fake Review Detection
+      <section className="relative overflow-hidden px-6 pb-24 pt-32">
+        <div className="absolute left-1/2 top-16 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-300/35 blur-3xl" />
+        <div className="absolute -left-16 top-48 h-64 w-64 rounded-full bg-orange-200/40 blur-3xl" />
+
+        <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center">
+          <div>
+            <Badge className="mb-6 border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50">
+              <Sparkles className="mr-1 h-3 w-3" />
+              Detection That Explains Itself
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-              Protect Your Business From Fake Reviews
+            <h1 className="mb-6 text-5xl font-extrabold leading-tight text-slate-900 md:text-6xl">
+              Turn review chaos into an evidence-backed reputation engine
             </h1>
-            <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
-              Detect, analyze, and remove fake reviews before they hurt your reputation.
-              The only AI-powered platform built for SMBs.
+            <p className="mb-10 max-w-2xl text-lg leading-relaxed text-slate-600">
+              ReviewShield scores suspicious reviews in real time, shows the why behind each decision, and prepares removal-ready evidence so your team can act fast without guesswork.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 transition-all hover:scale-[1.02]">
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <Button size="lg" className="bg-emerald-600 text-white hover:bg-emerald-700">
                 Start Free Trial
-                <ArrowRight className="ml-2 w-4 h-4" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline" className="border-border">
-                Watch Demo
-              </Button>
+              <Button size="lg" variant="outline">Watch Demo</Button>
+            </div>
+            <div className="mt-8 flex flex-wrap items-center gap-5 text-sm text-slate-600">
+              <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-600" />Setup in under 10 minutes</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-600" />Works with Google, Yelp, Facebook</div>
             </div>
           </div>
 
-          {/* Trust indicators */}
-          <div className="mt-16 text-center">
-            <p className="text-sm text-muted-foreground mb-6">Trusted by 500+ businesses</p>
-            <div className="flex items-center justify-center gap-8 opacity-50">
-              {trustLogos.map((logo) => (
-                <span key={logo} className="text-lg font-semibold text-muted-foreground">{logo}</span>
+          <Card className="border-slate-200/80 bg-white/85 shadow-xl backdrop-blur">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl"><Radar className="h-5 w-5 text-emerald-600" />Live Threat Feed</CardTitle>
+              <CardDescription>Current risk stream for your locations</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[
+                { author: "M. Chen", risk: "Critical", score: 92, reason: "Template phrasing + burst activity" },
+                { author: "E. Rodriguez", risk: "High", score: 88, reason: "All-caps abuse + account age anomaly" },
+                { author: "D. Wilson", risk: "Medium", score: 45, reason: "Mixed sentiment + unnatural cadence" },
+              ].map((item) => (
+                <div key={item.author} className="rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="font-semibold text-slate-900">{item.author}</p>
+                    <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">{item.risk} {item.score}%</Badge>
+                  </div>
+                  <p className="text-sm text-slate-600">{item.reason}</p>
+                </div>
               ))}
-            </div>
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+                <div className="mb-1 flex items-center gap-2 font-medium"><Zap className="h-4 w-4" />Auto-generated evidence pack ready</div>
+                Submit to Google in one click.
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mx-auto mt-16 max-w-7xl text-center">
+          <p className="mb-6 text-sm text-slate-500">Trusted by 500+ businesses</p>
+          <div className="flex flex-wrap items-center justify-center gap-8 opacity-65">
+            {trustLogos.map((logo) => (
+              <span key={logo} className="text-lg font-semibold text-slate-500">{logo}</span>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 px-6 bg-muted/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Everything You Need to Fight Fake Reviews
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Powerful tools to detect, analyze, and remove fake reviews from your business listings.
-            </p>
+      <section id="features" className="bg-white px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-14 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-slate-900 md:text-4xl">Designed for teams that need speed and proof</h2>
+            <p className="mx-auto max-w-2xl text-lg text-slate-600">A bolder workflow with fewer clicks, clearer signals, and evidence that is easy to submit and audit.</p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature) => (
-              <Card key={feature.title} className="border-border shadow-sm hover:shadow-md transition-all hover:scale-[1.02]">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature, index) => (
+              <Card key={feature.title} className={`border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${index === 0 ? "md:col-span-2" : ""}`}>
                 <CardHeader>
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  </div>
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100"><feature.icon className="h-6 w-6 text-emerald-700" /></div>
                   <CardTitle className="text-lg">{feature.title}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
+                <CardContent><p className="text-slate-600">{feature.description}</p></CardContent>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section id="how-it-works" className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              How It Works
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Get started in minutes with our simple three-step process.
-            </p>
+      <section id="how-it-works" className="px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-slate-900 md:text-4xl">How it works</h2>
+            <p className="mx-auto max-w-2xl text-lg text-slate-600">Three steps from noisy reviews to removal requests with confidence.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl font-bold text-primary-foreground">1</span>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Connect Your Business</h3>
-              <p className="text-muted-foreground">
-                Link your Google Business Profile and other platforms to start monitoring reviews.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl font-bold text-primary-foreground">2</span>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">AI Analyzes Reviews</h3>
-              <p className="text-muted-foreground">
-                Our hybrid AI engine scans each review for fake patterns and assigns a risk score.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-2xl font-bold text-primary-foreground">3</span>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Remove With Evidence</h3>
-              <p className="text-muted-foreground">
-                Generate evidence packages and submit removal requests directly to Google.
-              </p>
-            </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              { step: "01", title: "Connect Platforms", text: "Bring in Google, Yelp, and Facebook streams from all locations in one place." },
+              { step: "02", title: "Score and Explain", text: "Every review gets a transparent risk score and a plain-language breakdown." },
+              { step: "03", title: "Submit Evidence", text: "Generate export-ready evidence packages and submit takedown requests fast." },
+            ].map((item) => (
+              <Card key={item.step} className="border-slate-200 bg-white/85">
+                <CardHeader>
+                  <p className="mb-2 text-sm font-semibold tracking-wide text-emerald-700">{item.step}</p>
+                  <CardTitle>{item.title}</CardTitle>
+                </CardHeader>
+                <CardContent><p className="text-slate-600">{item.text}</p></CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20 px-6 bg-muted/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Simple, Transparent Pricing
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Start free and scale as your business grows. No hidden fees.
-            </p>
+      <section id="pricing" className="bg-[#f6fbf8] px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-slate-900 md:text-4xl">Pricing that scales with your reputation risk</h2>
+            <p className="mx-auto max-w-2xl text-lg text-slate-600">Start free, upgrade when the volume increases.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
             {pricing.map((plan) => (
-              <Card key={plan.name} className={`border-2 ${plan.popular ? 'border-primary shadow-lg' : 'border-border'} relative`}>
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">
-                    Most Popular
-                  </Badge>
-                )}
+              <Card key={plan.name} className={`relative border-2 ${plan.popular ? "border-emerald-500 shadow-lg" : "border-slate-200"}`}>
+                {plan.popular && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white">Most Popular</Badge>}
                 <CardHeader>
                   <CardTitle className="text-xl">{plan.name}</CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  </div>
-                  <ul className="space-y-3 mb-6">
+                  <div className="mb-6"><span className="text-4xl font-bold text-slate-900">{plan.price}</span><span className="text-slate-500">{plan.period}</span></div>
+                  <ul className="mb-6 space-y-3">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                        {feature}
-                      </li>
+                      <li key={feature} className="flex items-center gap-2 text-sm text-slate-600"><CheckCircle2 className="h-4 w-4 text-emerald-500" />{feature}</li>
                     ))}
                   </ul>
-                  <Button className={`w-full ${plan.popular ? 'bg-orange-500 hover:bg-orange-600' : ''}`}>
-                    {plan.cta}
-                  </Button>
+                  <Button className={`w-full ${plan.popular ? "bg-emerald-600 text-white hover:bg-emerald-700" : ""}`}>{plan.cta}</Button>
                 </CardContent>
               </Card>
             ))}
@@ -287,65 +255,29 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Ready to Protect Your Business?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-10">
-            Join hundreds of businesses already using ReviewShield to detect and remove fake reviews.
-          </p>
-          <Button size="lg" className="bg-orange-500 hover:bg-orange-600 transition-all hover:scale-[1.02]">
-            Start Free Trial
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
+      <section className="px-6 py-20">
+        <div className="mx-auto max-w-4xl rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-100 via-white to-orange-100 p-10 text-center shadow-sm">
+          <h2 className="mb-4 text-3xl font-bold text-slate-900 md:text-4xl">Protect your public reputation before the next fake wave hits</h2>
+          <p className="mb-8 text-lg text-slate-600">Start your trial today and get your first threat report in minutes.</p>
+          <Button size="lg" className="bg-emerald-600 text-white hover:bg-emerald-700">Start Free Trial<ArrowRight className="ml-2 h-4 w-4" /></Button>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300 py-16 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
+      <footer className="bg-slate-900 px-6 py-16 text-slate-300">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 grid gap-8 md:grid-cols-4">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-primary-foreground" />
-                </div>
+              <div className="mb-4 flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600"><Shield className="h-5 w-5 text-white" /></div>
                 <span className="text-xl font-bold text-white">ReviewShield</span>
               </div>
-              <p className="text-sm">
-                AI-powered fake review detection for modern businesses.
-              </p>
+              <p className="text-sm">AI-powered fake review detection for modern businesses.</p>
             </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Product</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API Docs</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
-              </ul>
-            </div>
+            <div><h3 className="mb-4 font-semibold text-white">Product</h3><ul className="space-y-2 text-sm"><li>Features</li><li>Pricing</li><li>Integrations</li></ul></div>
+            <div><h3 className="mb-4 font-semibold text-white">Resources</h3><ul className="space-y-2 text-sm"><li>Documentation</li><li>API</li><li>Support</li></ul></div>
+            <div><h3 className="mb-4 font-semibold text-white">Company</h3><ul className="space-y-2 text-sm"><li>About</li><li>Privacy</li><li>Terms</li></ul></div>
           </div>
-          <div className="border-t border-slate-800 pt-8 text-sm text-center">
-            <p>&copy; 2026 ReviewShield AI. All rights reserved.</p>
-          </div>
+          <div className="border-t border-slate-800 pt-8 text-center text-sm"><p>© 2026 ReviewShield. All rights reserved.</p></div>
         </div>
       </footer>
     </div>

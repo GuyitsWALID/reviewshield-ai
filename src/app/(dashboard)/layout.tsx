@@ -108,27 +108,24 @@ export default function DashboardLayout({
         {/* User */}
         <div className="p-3 border-t border-slate-200">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start gap-3 px-3",
-                  collapsed && "justify-center px-0"
-                )}
-              >
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="bg-indigo-100 text-indigo-700 text-sm">
-                    JD
-                  </AvatarFallback>
-                </Avatar>
-                {!collapsed && (
-                  <div className="flex flex-col items-start text-left">
-                    <span className="text-sm font-medium text-slate-900">John Doe</span>
-                    <span className="text-xs text-slate-500">john@business.com</span>
-                  </div>
-                )}
-              </Button>
+            <DropdownMenuTrigger
+              className={cn(
+                "w-full inline-flex items-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 justify-start gap-3 px-3",
+                collapsed && "justify-center px-0"
+              )}
+            >
+              <Avatar className="w-8 h-8">
+                <AvatarImage src="" />
+                <AvatarFallback className="bg-indigo-100 text-indigo-700 text-sm">
+                  JD
+                </AvatarFallback>
+              </Avatar>
+              {!collapsed && (
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-sm font-medium text-slate-900">John Doe</span>
+                  <span className="text-xs text-slate-500">john@business.com</span>
+                </div>
+              )}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>

@@ -198,7 +198,10 @@ export default function ReviewsPage() {
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <Input placeholder="Search reviews..." className="pl-10" />
             </div>
-            <Select value={platform} onValueChange={setPlatform}>
+            <Select
+              value={platform}
+              onValueChange={(value) => setPlatform(value ?? "all")}
+            >
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Platform" />
               </SelectTrigger>
@@ -209,7 +212,10 @@ export default function ReviewsPage() {
                 <SelectItem value="Facebook">Facebook</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={riskLevel} onValueChange={setRiskLevel}>
+            <Select
+              value={riskLevel}
+              onValueChange={(value) => setRiskLevel(value ?? "all")}
+            >
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Risk Level" />
               </SelectTrigger>
@@ -221,7 +227,10 @@ export default function ReviewsPage() {
                 <SelectItem value="low">Low</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={status} onValueChange={setStatus}>
+            <Select
+              value={status}
+              onValueChange={(value) => setStatus(value ?? "all")}
+            >
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -311,10 +320,8 @@ export default function ReviewsPage() {
                     Flag
                   </Button>
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <MoreHorizontal className="w-3 h-3" />
-                      </Button>
+                    <DropdownMenuTrigger className="inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium shadow-xs transition-all outline-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50">
+                      <MoreHorizontal className="w-3 h-3" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Generate Evidence</DropdownMenuItem>

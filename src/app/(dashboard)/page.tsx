@@ -14,6 +14,8 @@ import {
   FileText,
   MoreHorizontal,
   ExternalLink,
+  ShieldCheck,
+  Clock3,
 } from "lucide-react";
 
 // Mock data
@@ -151,7 +153,26 @@ const getRiskBadge = (level: string) => {
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-100 via-white to-orange-100 p-5 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="mb-1 text-xs font-semibold tracking-wide text-emerald-700">TODAY'S SNAPSHOT</p>
+            <h2 className="text-2xl font-bold text-slate-900">Your reputation shield is active</h2>
+            <p className="text-sm text-slate-600">12 new reviews analyzed, 4 flagged for action, 1 evidence package ready.</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" className="gap-2 bg-white">
+              <Clock3 className="h-4 w-4" />
+              Last sync 2m ago
+            </Button>
+            <Button className="gap-2 bg-emerald-600 text-white hover:bg-emerald-700">
+              <ShieldCheck className="h-4 w-4" />
+              Review Threat Queue
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
@@ -162,17 +183,16 @@ export default function DashboardPage() {
             <Search className="w-4 h-4" />
             Scan Reviews
           </Button>
-          <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+          <Button className="gap-2 bg-emerald-600 text-white hover:bg-emerald-700">
             <RefreshCw className="w-4 h-4" />
             Refresh
           </Button>
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.title} className="border-slate-200">
+          <Card key={stat.title} className="border-slate-200 shadow-sm">
             <CardContent className="pt-6">
               <div className="flex items-start justify-between">
                 <div>
@@ -211,91 +231,150 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex gap-3">
-        <Button variant="outline" className="gap-2">
-          <Search className="w-4 h-4" />
-          Scan Now
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <Star className="w-4 h-4" />
-          View All Reviews
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <FileText className="w-4 h-4" />
-          Generate Report
-        </Button>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="border-slate-200">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-slate-500">Run Full Scan</p>
+              <p className="mt-1 text-sm font-medium text-slate-800">Across all connected platforms</p>
+            </div>
+            <Button variant="outline" className="gap-2">
+              <Search className="w-4 h-4" />
+              Scan Now
+            </Button>
+          </CardContent>
+        </Card>
+        <Card className="border-slate-200">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-slate-500">Review Queue</p>
+              <p className="mt-1 text-sm font-medium text-slate-800">4 items need decision</p>
+            </div>
+            <Button variant="outline" className="gap-2">
+              <Star className="w-4 h-4" />
+              Open Queue
+            </Button>
+          </CardContent>
+        </Card>
+        <Card className="border-slate-200">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-slate-500">Evidence Packs</p>
+              <p className="mt-1 text-sm font-medium text-slate-800">1 package ready to submit</p>
+            </div>
+            <Button variant="outline" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Generate
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Recent Reviews */}
-      <Card className="border-slate-200">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Recent Reviews</CardTitle>
-            <CardDescription>Latest reviews with risk analysis</CardDescription>
-          </div>
-          <Button variant="ghost" size="sm" className="gap-1">
-            View All
-            <ExternalLink className="w-3 h-3" />
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentReviews.map((review) => (
-              <div
-                key={review.id}
-                className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-sm font-medium text-slate-600">
-                      {review.avatar}
+      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+        <Card className="border-slate-200">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Recent Reviews</CardTitle>
+              <CardDescription>Latest reviews with risk analysis</CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" className="gap-1">
+              View All
+              <ExternalLink className="w-3 h-3" />
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentReviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="rounded-xl border border-slate-200 p-4 transition-colors hover:bg-slate-50"
+                >
+                  <div className="mb-3 flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-sm font-medium text-slate-600">
+                        {review.avatar}
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900">{review.author}</p>
+                        <p className="text-sm text-slate-500">{review.date}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-slate-900">{review.author}</p>
-                      <p className="text-sm text-slate-500">{review.date}</p>
+                    <div className="flex items-center gap-3">
+                      <Badge className={getRiskBadge(review.riskLevel)}>
+                        <span className={`mr-2 h-2 w-2 rounded-full ${getRiskColor(review.riskLevel)}`} />
+                        {review.riskLevel.toUpperCase()} ({review.riskScore}%)
+                      </Badge>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Badge className={getRiskBadge(review.riskLevel)}>
-                      <span className={`w-2 h-2 rounded-full mr-2 ${getRiskColor(review.riskLevel)}`} />
-                      {review.riskLevel.toUpperCase()} ({review.riskScore}%)
+
+                  <div className="mb-2 flex items-center gap-2">
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= review.rating
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-slate-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {review.platform}
                     </Badge>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
+                  </div>
+
+                  <p className="mb-3 line-clamp-2 text-sm text-slate-700">{review.content}</p>
+
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <AlertTriangle className="w-3 h-3" />
+                    <span>Detection: {review.detection}</span>
                   </div>
                 </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`w-4 h-4 ${
-                          star <= review.rating
-                            ? "fill-amber-400 text-amber-400"
-                            : "text-slate-300"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {review.platform}
-                  </Badge>
+        <Card className="border-slate-200">
+          <CardHeader>
+            <CardTitle>Risk Distribution</CardTitle>
+            <CardDescription>Current queue composition</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[
+              { label: "Critical", value: 6, color: "bg-red-500" },
+              { label: "High", value: 9, color: "bg-orange-500" },
+              { label: "Medium", value: 14, color: "bg-amber-500" },
+              { label: "Low", value: 33, color: "bg-emerald-500" },
+            ].map((item) => (
+              <div key={item.label}>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="font-medium text-slate-700">{item.label}</span>
+                  <span className="text-slate-500">{item.value}%</span>
                 </div>
-
-                <p className="text-sm text-slate-700 mb-3 line-clamp-2">{review.content}</p>
-
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <AlertTriangle className="w-3 h-3" />
-                  <span>Detection: {review.detection}</span>
+                <div className="h-2 rounded-full bg-slate-100">
+                  <div
+                    className={`h-2 rounded-full ${item.color}`}
+                    style={{ width: `${item.value}%` }}
+                  />
                 </div>
               </div>
             ))}
-          </div>
-        </CardContent>
-      </Card>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="mb-2 text-sm font-medium text-slate-900">Recommendation</p>
+              <p className="text-sm text-slate-600">
+                Focus on critical and high-risk items from Google first. These reviews have the strongest removal evidence and highest impact on score.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
