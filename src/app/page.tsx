@@ -92,11 +92,11 @@ const trustLogos = ["Google", "Yelp", "Facebook", "Trustpilot", "G2"];
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#d2f4ea_0%,#f7fffc_30%,#fff7ef_65%,#ffffff_100%)]">
-      <header className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
+      <header className="fixed left-0 right-0 top-0 z-50 h-20 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <div className="flex items-center justify-center">
-              <img src="/ReviewShield AI logo design.png" alt="ReviewShield AI" className="h-10 w-10 object-contain" />
+              <img src="/ReviewShield AI logo design.png" alt="ReviewShield AI" className="h-16 w-16 object-contain" />
             </div>
             
           </div>

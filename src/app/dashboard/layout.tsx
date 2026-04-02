@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   Shield,
   LayoutDashboard,
@@ -14,13 +15,12 @@ import {
   FileText,
   Settings,
   CreditCard,
-  Menu,
   Search,
   ChevronLeft,
   LogOut,
   User,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +45,46 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const [displayName, setDisplayName] = useState("User");
+  const [email, setEmail] = useState("user@example.com");
+
+  useEffect(() => {
+    const loadUser = async () => {
+      if (!supabase) return;
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      setDisplayName(
+        (user.user_metadata.full_name as string | undefined) ||
+          user.email?.split("@")[0] ||
+          "User"
+      );
+      setEmail(user.email ?? "user@example.com");
+    };
+
+    void loadUser();
+  }, [supabase]);
+
+  const initials = displayName
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+
+  const handleSignOut = async () => {
+    if (!supabase) return;
+
+    await supabase.auth.signOut();
+    router.push("/sign-in");
+    router.refresh();
+  };
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -117,13 +156,13 @@ export default function DashboardLayout({
               <Avatar className="w-8 h-8">
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-indigo-100 text-indigo-700 text-sm">
-                  JD
+                  {initials || "US"}
                 </AvatarFallback>
               </Avatar>
               {!collapsed && (
                 <div className="flex flex-col items-start text-left">
-                  <span className="text-sm font-medium text-slate-900">John Doe</span>
-                  <span className="text-xs text-slate-500">john@business.com</span>
+                  <span className="text-sm font-medium text-slate-900">{displayName}</span>
+                  <span className="text-xs text-slate-500">{email}</span>
                 </div>
               )}
             </DropdownMenuTrigger>
@@ -139,7 +178,7 @@ export default function DashboardLayout({
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem className="text-red-600" onSelect={handleSignOut}>
                 <LogOut className="mr-2 w-4 h-4" />
                 Log out
               </DropdownMenuItem>
@@ -171,7 +210,7 @@ export default function DashboardLayout({
             </Button>
             <Avatar className="w-8 h-8">
               <AvatarImage src="" />
-              <AvatarFallback className="bg-indigo-100 text-indigo-700 text-sm">JD</AvatarFallback>
+              <AvatarFallback className="bg-indigo-100 text-indigo-700 text-sm">{initials || "US"}</AvatarFallback>
             </Avatar>
           </div>
         </header>

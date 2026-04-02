@@ -1,239 +1,216 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  FileText,
-  Download,
-  Copy,
-  ExternalLink,
-  Brain,
-  User,
-  Clock,
-  GitCompare,
-} from "lucide-react";
-
-const mockReview = {
-  id: "1",
-  author: "Michael Chen",
-  rating: 1,
-  content: "Terrible service! Complete waste of time. Never coming back. This business should be shut down immediately!!!",
-  date: "2 hours ago",
-  platform: "Google",
-};
+import { Brain, Copy, Download, ExternalLink, FileText, GitCompare, User, Clock } from "lucide-react";
+import type { Review } from "@/lib/types";
 
 const evidenceComponents = [
-  {
-    id: "ai-score",
-    label: "AI Confidence Score",
-    description: "Overall fake probability score from our ML model",
-    icon: Brain,
-    selected: true,
-  },
-  {
-    id: "stylometry",
-    label: "Stylometric Analysis",
-    description: "Language patterns, word choice, and sentence structure analysis",
-    icon: FileText,
-    selected: true,
-  },
-  {
-    id: "profile",
-    label: "Reviewer Profile Data",
-    description: "Account age, review history, and behavioral patterns",
-    icon: User,
-    selected: true,
-  },
-  {
-    id: "temporal",
-    label: "Temporal Analysis",
-    description: "Review timing patterns and burst detection",
-    icon: Clock,
-    selected: true,
-  },
-  {
-    id: "similarity",
-    label: "Similarity Report",
-    description: "Comparison to known fake review patterns",
-    icon: GitCompare,
-    selected: true,
-  },
+  { id: "ai-score", label: "AI Confidence Score", icon: Brain },
+  { id: "stylometry", label: "Stylometric Analysis", icon: FileText },
+  { id: "profile", label: "Reviewer Profile Data", icon: User },
+  { id: "temporal", label: "Temporal Analysis", icon: Clock },
+  { id: "similarity", label: "Similarity Report", icon: GitCompare },
 ];
 
 export default function EvidencePage() {
-  const [selectedComponents, setSelectedComponents] = useState(
-    evidenceComponents.filter((c) => c.selected).map((c) => c.id)
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedComponents, setSelectedComponents] = useState<string[]>(
+    evidenceComponents.map((component) => component.id)
   );
+  const [review, setReview] = useState<Review | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const loadReview = useCallback(async () => {
+    const response = await fetch("/api/reviews", { cache: "no-store" });
+    if (!response.ok) return;
+
+    const data = (await response.json()) as { reviews: Review[] };
+    const source = data.reviews ?? [];
+
+    if (selectedId) {
+      setReview(source.find((item) => item.id === selectedId) ?? source[0] ?? null);
+      return;
+    }
+
+    setReview(source[0] ?? null);
+  }, [selectedId]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      setSelectedId(url.searchParams.get("reviewId"));
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadReview();
+  }, [loadReview]);
 
   const toggleComponent = (id: string) => {
     setSelectedComponents((prev) =>
-      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((componentId) => componentId !== id) : [...prev, id]
     );
+  };
+
+  const riskBadge = useMemo(() => {
+    if (!review) return "bg-slate-100 text-slate-700";
+    if (review.riskScore >= 85) return "bg-red-100 text-red-700";
+    if (review.riskScore >= 65) return "bg-orange-100 text-orange-700";
+    if (review.riskScore >= 35) return "bg-amber-100 text-amber-700";
+    return "bg-emerald-100 text-emerald-700";
+  }, [review]);
+
+  const generateReport = async () => {
+    if (!review) return;
+    const response = await fetch(`/api/reviews/${review.id}/report`, { method: "POST" });
+    const payload = (await response.json()) as { googleReportUrl?: string; error?: string };
+
+    if (!response.ok) {
+      setMessage(payload.error ?? "Failed to generate report.");
+      return;
+    }
+
+    setMessage("Evidence package generated. Redirecting to Google form.");
+    if (payload.googleReportUrl) {
+      window.open(payload.googleReportUrl, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const downloadPdf = () => {
+    if (!review) return;
+    window.open(`/api/evidence/${review.id}`, "_blank", "noopener,noreferrer");
+  };
+
+  const copySummary = async () => {
+    if (!review) return;
+
+    const text = [
+      `Review ID: ${review.id}`,
+      `Author: ${review.author}`,
+      `Risk Score: ${review.riskScore}%`,
+      `Risk Level: ${review.riskLevel}`,
+      `Detection: ${review.detection}`,
+      `Content: ${review.content}`,
+    ].join("\n");
+
+    await navigator.clipboard.writeText(text);
+    setMessage("Evidence summary copied to clipboard.");
   };
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Evidence Package</h1>
-          <p className="text-slate-500">Generate evidence for Google removal requests</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Evidence Package</h1>
+        <p className="text-slate-500">Generate evidence for Google removal requests</p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Selected Review Summary */}
-        <Card className="border-slate-200">
-          <CardHeader>
-            <CardTitle>Selected Review</CardTitle>
-            <CardDescription>The review to generate evidence for</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="p-4 bg-slate-50 rounded-lg">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center text-sm font-medium text-slate-600">
-                    MC
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-900">{mockReview.author}</p>
-                    <p className="text-sm text-slate-500">{mockReview.date}</p>
-                  </div>
-                </div>
-                <Badge className="bg-red-100 text-red-700">
-                  {mockReview.rating} star
-                </Badge>
-              </div>
-              <p className="text-sm text-slate-700">{mockReview.content}</p>
-              <div className="mt-3">
-                <Badge variant="outline">
-                  <ExternalLink className="w-3 h-3 mr-1" />
-                  {mockReview.platform}
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {message ? <p className="text-sm text-indigo-700">{message}</p> : null}
 
-        {/* Detection Summary */}
+      {!review ? (
         <Card className="border-slate-200">
-          <CardHeader>
-            <CardTitle>Detection Summary</CardTitle>
-            <CardDescription>Why this review was flagged</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                <span className="font-medium text-slate-900">Risk Score</span>
-                <span className="text-2xl font-bold text-red-600">92%</span>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-slate-900 mb-2">
-                  Contributing Factors
-                </h4>
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-                    Template language detected
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-                    Excessive punctuation (!!!)
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-                    New account (created today)
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-slate-600">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-                    First review from this account
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
+          <CardContent className="py-10 text-sm text-slate-500">No review selected yet. Open Reviews and choose an item first.</CardContent>
         </Card>
-      </div>
-
-      {/* Evidence Components */}
-      <Card className="border-slate-200">
-        <CardHeader>
-          <CardTitle>Evidence Components</CardTitle>
-          <CardDescription>
-            Select which evidence to include in the report
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {evidenceComponents.map((component) => (
-              <div
-                key={component.id}
-                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                  selectedComponents.includes(component.id)
-                    ? "border-indigo-500 bg-indigo-50"
-                    : "border-slate-200 hover:border-slate-300"
-                }`}
-                onClick={() => toggleComponent(component.id)}
-              >
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    checked={selectedComponents.includes(component.id)}
-                    className="mt-1"
-                  />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <component.icon className="w-4 h-4 text-indigo-600" />
-                      <Label className="font-medium cursor-pointer">
-                        {component.label}
-                      </Label>
+      ) : (
+        <>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card className="border-slate-200">
+              <CardHeader>
+                <CardTitle>Selected Review</CardTitle>
+                <CardDescription>The review to generate evidence for</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-slate-900">{review.author}</p>
+                      <p className="text-sm text-slate-500">{review.date}</p>
                     </div>
-                    <p className="text-sm text-slate-500 mt-1">
-                      {component.description}
-                    </p>
+                    <Badge className={riskBadge}>{review.riskScore}%</Badge>
                   </div>
+                  <p className="text-sm text-slate-700">{review.content}</p>
                 </div>
-              </div>
-            ))}
+              </CardContent>
+            </Card>
+
+            <Card className="border-slate-200">
+              <CardHeader>
+                <CardTitle>Detection Summary</CardTitle>
+                <CardDescription>Why this review was flagged</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between rounded-lg bg-red-50 p-3">
+                  <span className="font-medium text-slate-900">Risk Score</span>
+                  <span className="text-2xl font-bold text-red-600">{review.riskScore}%</span>
+                </div>
+                <p className="text-sm text-slate-600">{review.detection}</p>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Notes */}
-      <Card className="border-slate-200">
-        <CardHeader>
-          <CardTitle>Additional Notes</CardTitle>
-          <CardDescription>
-            Add context to your removal request (optional)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="Add any additional context that will help support your removal request..."
-            className="min-h-[100px]"
-          />
-        </CardContent>
-      </Card>
+          <Card className="border-slate-200">
+            <CardHeader>
+              <CardTitle>Evidence Components</CardTitle>
+              <CardDescription>Select which evidence to include in the report</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {evidenceComponents.map((component) => (
+                  <div
+                    key={component.id}
+                    className={`cursor-pointer rounded-lg border p-4 ${
+                      selectedComponents.includes(component.id)
+                        ? "border-indigo-500 bg-indigo-50"
+                        : "border-slate-200 hover:border-slate-300"
+                    }`}
+                    onClick={() => toggleComponent(component.id)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Checkbox checked={selectedComponents.includes(component.id)} className="mt-1" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <component.icon className="h-4 w-4 text-indigo-600" />
+                          <Label className="cursor-pointer font-medium">{component.label}</Label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Actions */}
-      <div className="flex gap-3">
-        <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
-          <Download className="w-4 h-4" />
-          Download PDF
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <Copy className="w-4 h-4" />
-          Copy to Clipboard
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <ExternalLink className="w-4 h-4" />
-          Open Google Report Form
-        </Button>
-      </div>
+          <Card className="border-slate-200">
+            <CardHeader>
+              <CardTitle>Additional Notes</CardTitle>
+              <CardDescription>Add context to your removal request (optional)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Textarea placeholder="Add context for this case..." className="min-h-[100px]" />
+            </CardContent>
+          </Card>
+
+          <div className="flex flex-wrap gap-3">
+            <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700" onClick={downloadPdf}>
+              <Download className="h-4 w-4" />
+              Download PDF
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={copySummary}>
+              <Copy className="h-4 w-4" />
+              Copy Summary
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={generateReport}>
+              <ExternalLink className="h-4 w-4" />
+              Report to Google
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
