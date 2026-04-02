@@ -95,10 +95,10 @@ export default function LandingPage() {
       <header className="fixed left-0 right-0 top-0 z-50 h-16 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600">
-              <Shield className="h-5 w-5 text-white" />
+            <div className="flex items-center justify-center">
+              <img src="/ReviewShield AI logo design.png" alt="ReviewShield AI" className="h-10 w-10 object-contain" />
             </div>
-            <span className="text-xl font-bold text-foreground">ReviewShield</span>
+            
           </div>
           <nav className="hidden items-center gap-8 md:flex">
             <a href="#features" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">Features</a>
