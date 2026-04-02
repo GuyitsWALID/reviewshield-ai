@@ -24,6 +24,20 @@ export async function GET(
     return NextResponse.json({ error: "Review not found" }, { status: 404 });
   }
 
+  const { data: verification } = await auth.supabase
+    .from("review_verifications")
+    .select("is_known_customer,notes")
+    .eq("user_id", auth.user.id)
+    .eq("review_id", review.id)
+    .maybeSingle();
+
+  const knownCustomerText =
+    verification?.is_known_customer === true
+      ? "Known customer"
+      : verification?.is_known_customer === false
+        ? "Not recognized as customer"
+        : "Not verified yet";
+
   const pdf = await PDFDocument.create();
   const page = pdf.addPage([595, 842]);
   const font = await pdf.embedFont(StandardFonts.Helvetica);
@@ -44,6 +58,8 @@ export async function GET(
     `Review Date: ${review.created_at ? new Date(review.created_at).toLocaleString() : "Unknown"}`,
     `Risk Score: ${review.risk_score ?? 0}%`,
     `Risk Level: ${review.risk_level ?? "unknown"}`,
+    `Customer Verification: ${knownCustomerText}`,
+    `Verification Notes: ${verification?.notes ?? "None"}`,
     "",
     "Detection Rationale:",
     `${review.detection_reason ?? "No rationale captured"}`,

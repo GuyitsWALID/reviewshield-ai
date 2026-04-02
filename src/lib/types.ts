@@ -18,6 +18,8 @@ export interface Review {
   accountId?: string;
   locationId?: string;
   googleReviewId?: string;
+  isKnownCustomer?: boolean;
+  customerVerificationNotes?: string;
 }
 
 export interface AlertItem {

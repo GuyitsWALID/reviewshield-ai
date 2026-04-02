@@ -57,8 +57,20 @@ export async function GET(request: NextRequest) {
     .order("created_at", { ascending: false })
     .limit(200);
 
+  const { data: verificationRows } = await auth.supabase
+    .from("review_verifications")
+    .select("review_id,is_known_customer,notes")
+    .eq("user_id", auth.user.id);
+
+  const verificationMap = new Map(
+    (verificationRows ?? []).map((item) => [item.review_id, item])
+  );
+
   reviews =
-    existingReviews?.map((row) => ({
+    existingReviews?.map((row) => {
+      const verification = verificationMap.get(row.id);
+
+      return {
       id: row.id,
       author: row.author_name ?? "Unknown",
       avatar: avatarFromName(row.author_name ?? "Unknown"),
@@ -74,7 +86,10 @@ export async function GET(request: NextRequest) {
       accountId: row.account_id ?? undefined,
       locationId: row.location_id ?? undefined,
       googleReviewId: row.google_review_id ?? undefined,
-    })) ?? [];
+      isKnownCustomer: verification?.is_known_customer ?? undefined,
+      customerVerificationNotes: verification?.notes ?? undefined,
+    };
+    }) ?? [];
 
   if (shouldSync) {
     const connections = await getUserConnections(auth.user.id);

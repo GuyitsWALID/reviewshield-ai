@@ -23,6 +23,13 @@ const statusStyles: Record<string, string> = {
   legitimate: "bg-emerald-100 text-emerald-700",
 };
 
+function confidenceMeaning(score: number) {
+  if (score >= 90) return "Critical confidence: very likely fake.";
+  if (score >= 70) return "High confidence: likely fake, review evidence.";
+  if (score >= 40) return "Medium confidence: ambiguous, verify manually.";
+  return "Low confidence: likely legitimate.";
+}
+
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [query, setQuery] = useState("");
@@ -104,6 +111,27 @@ export default function ReviewsPage() {
     window.open(`/api/evidence/${reviewId}`, "_blank", "noopener,noreferrer");
   };
 
+  const handleKnownCustomer = async (reviewId: string, isKnownCustomer: boolean) => {
+    const response = await fetch(`/api/reviews/${reviewId}/customer-verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isKnownCustomer }),
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      setActionMessage(payload.error ?? "Failed to update customer verification.");
+      return;
+    }
+
+    setActionMessage(
+      isKnownCustomer
+        ? "Marked as known customer. This will be included in evidence."
+        : "Marked as unknown customer."
+    );
+    await loadReviews();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -182,6 +210,12 @@ export default function ReviewsPage() {
                   <div className="flex items-center gap-2">
                     <Badge className={riskStyles[review.riskLevel] || riskStyles.low}>{review.riskLevel.toUpperCase()} {review.riskScore}%</Badge>
                     <Badge className={statusStyles[review.status] || statusStyles.pending}>{review.status}</Badge>
+                    {review.isKnownCustomer === true ? (
+                      <Badge className="bg-emerald-100 text-emerald-700">Known Customer</Badge>
+                    ) : null}
+                    {review.isKnownCustomer === false ? (
+                      <Badge className="bg-slate-100 text-slate-700">Unverified Customer</Badge>
+                    ) : null}
                   </div>
                 </div>
 
@@ -200,6 +234,8 @@ export default function ReviewsPage() {
                   <span>{review.detection}</span>
                 </div>
 
+                <p className="mb-3 text-xs text-slate-500">{confidenceMeaning(review.riskScore)}</p>
+
                 <div className="flex flex-wrap gap-2">
                   <Button variant="outline" size="sm" className="gap-1" onClick={() => handleEvidenceExport(review.id)}>
                     <Eye className="h-3 w-3" />
@@ -212,6 +248,20 @@ export default function ReviewsPage() {
                   <Button variant="outline" size="sm" className="gap-1" onClick={() => handleReport(review.id)}>
                     <Flag className="h-3 w-3" />
                     Report to Google
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleKnownCustomer(review.id, true)}
+                  >
+                    Mark Known Customer
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleKnownCustomer(review.id, false)}
+                  >
+                    Mark Unknown
                   </Button>
                 </div>
               </div>

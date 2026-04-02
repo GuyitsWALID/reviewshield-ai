@@ -23,6 +23,13 @@ export async function POST(
     return NextResponse.json({ error: "Review not found" }, { status: 404 });
   }
 
+  const { data: verification } = await auth.supabase
+    .from("review_verifications")
+    .select("is_known_customer,notes")
+    .eq("user_id", auth.user.id)
+    .eq("review_id", review.id)
+    .maybeSingle();
+
   const payload = {
     user_id: auth.user.id,
     review_id: review.id,
@@ -34,6 +41,8 @@ export async function POST(
       risk_level: review.risk_level,
       detection_reason: review.detection_reason,
       content_excerpt: (review.comment ?? "").slice(0, 250),
+      known_customer: verification?.is_known_customer ?? null,
+      verification_notes: verification?.notes ?? null,
     },
   };
 

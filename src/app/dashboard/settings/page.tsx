@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,49 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function SettingsPage() {
   const [threshold, setThreshold] = useState([70]);
+  const [connections, setConnections] = useState<
+    Array<{
+      id: string;
+      account_id: string;
+      location_id: string;
+      location_name: string | null;
+      expires_at: string | null;
+    }>
+  >([]);
+  const [loadingConnections, setLoadingConnections] = useState(true);
+  const [gbpStatus, setGbpStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      const status = url.searchParams.get("gbp");
+      if (status) setGbpStatus(status);
+    }
+  }, []);
+
+  useEffect(() => {
+    const loadConnections = async () => {
+      setLoadingConnections(true);
+      const response = await fetch("/api/gbp/connections", { cache: "no-store" });
+      if (response.ok) {
+        const payload = (await response.json()) as { connections: typeof connections };
+        setConnections(payload.connections ?? []);
+      }
+      setLoadingConnections(false);
+    };
+
+    void loadConnections();
+  }, []);
+
+  const connectionHealth = useMemo(() => {
+    if (connections.length === 0) return "No connected locations yet";
+    const expired = connections.filter((item) => {
+      if (!item.expires_at) return false;
+      return new Date(item.expires_at).getTime() < Date.now();
+    }).length;
+    if (expired === 0) return "All connection tokens healthy";
+    return `${expired} token${expired === 1 ? "" : "s"} need reconnection`;
+  }, [connections]);
 
   return (
     <div className="space-y-6">
@@ -64,18 +107,73 @@ export default function SettingsPage() {
           <Card className="border-slate-200">
             <CardHeader>
               <CardTitle>Business Connections</CardTitle>
-              <CardDescription>Manage Google Business Profile locations</CardDescription>
+              <CardDescription>
+                One-click Google OAuth setup. We discover your locations automatically.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-lg border border-slate-200 p-4">
-                <p className="font-medium text-slate-900">Main Street Location</p>
-                <p className="text-sm text-slate-500">Connected via Google OAuth</p>
+              <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4">
+                <p className="font-medium text-indigo-900">How automatic setup works</p>
+                <p className="mt-1 text-sm text-indigo-800">
+                  1) Click Connect with Google. 2) Approve access. 3) We auto-import your business locations and start monitoring.
+                </p>
               </div>
+
+              {gbpStatus === "connected" ? (
+                <p className="text-sm text-emerald-700">Google Business connected successfully.</p>
+              ) : null}
+              {gbpStatus === "error" ? (
+                <p className="text-sm text-red-700">
+                  Connection failed. Retry with Google, then use support if the issue persists.
+                </p>
+              ) : null}
+
               <div className="rounded-lg border border-slate-200 p-4">
-                <p className="font-medium text-slate-900">Downtown Location</p>
-                <p className="text-sm text-slate-500">Connected via Google OAuth</p>
+                <p className="font-medium text-slate-900">Connection health</p>
+                <p className="text-sm text-slate-500">{connectionHealth}</p>
               </div>
-              <Button variant="outline">Connect New Location</Button>
+
+              <div className="space-y-3">
+                {loadingConnections ? (
+                  <p className="text-sm text-slate-500">Loading connected locations...</p>
+                ) : connections.length === 0 ? (
+                  <p className="text-sm text-slate-500">No locations connected yet.</p>
+                ) : (
+                  connections.map((connection) => (
+                    <div key={connection.id} className="rounded-lg border border-slate-200 p-4">
+                      <p className="font-medium text-slate-900">
+                        {connection.location_name ?? connection.location_id}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        Account {connection.account_id} · Location {connection.location_id}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                  onClick={() => {
+                    window.location.href = "/api/gbp/connect";
+                  }}
+                >
+                  Connect with Google
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    window.location.href = "/api/gbp/connect";
+                  }}
+                >
+                  Reconnect
+                </Button>
+              </div>
+
+              <p className="text-xs text-slate-500">
+                If automatic connect fails, contact support with your Google Business profile URL and we will assist with manual onboarding.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>

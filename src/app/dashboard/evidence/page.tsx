@@ -134,6 +134,17 @@ export default function EvidencePage() {
                     <Badge className={riskBadge}>{review.riskScore}%</Badge>
                   </div>
                   <p className="text-sm text-slate-700">{review.content}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {review.isKnownCustomer === true ? (
+                      <Badge className="bg-emerald-100 text-emerald-700">Known Customer</Badge>
+                    ) : null}
+                    {review.isKnownCustomer === false ? (
+                      <Badge className="bg-slate-100 text-slate-700">Unverified Customer</Badge>
+                    ) : null}
+                    {review.isKnownCustomer === undefined ? (
+                      <Badge className="bg-amber-100 text-amber-700">Customer Not Tagged</Badge>
+                    ) : null}
+                  </div>
                 </div>
               </CardContent>
             </Card>

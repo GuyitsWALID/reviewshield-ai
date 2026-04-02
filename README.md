@@ -19,6 +19,7 @@ The current integration expects these tables (with RLS enabled by `user_id`):
 2. `reviews`
 3. `alerts`
 4. `evidence_packages`
+5. `review_verifications`
 
 ### Minimal fields
 
@@ -69,12 +70,24 @@ The current integration expects these tables (with RLS enabled by `user_id`):
 - `generated_at` timestamptz
 - `summary` jsonb
 
+`review_verifications`
+- `user_id` uuid
+- `review_id` text
+- `is_known_customer` boolean
+- `notes` text
+- `updated_at` timestamptz
+- unique index on (`user_id`, `review_id`)
+
 ## Available API Endpoints
 
 - `GET /api/dashboard/summary`
 - `GET /api/reviews`
 - `GET /api/reviews?sync=true` (pull from GBP + upsert)
 - `GET /api/alerts`
+- `GET /api/gbp/connect` (starts Google OAuth)
+- `GET /api/gbp/callback` (OAuth callback + location discovery)
+- `GET /api/gbp/connections` (connected locations)
 - `POST /api/reviews/:reviewId/reply`
 - `POST /api/reviews/:reviewId/report`
+- `POST /api/reviews/:reviewId/customer-verify`
 - `GET /api/evidence/:reviewId` (PDF export)
