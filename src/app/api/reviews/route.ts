@@ -1,29 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/api-utils";
 import { fetchGoogleReviews, getUserConnections } from "@/lib/gbp";
-import type { Review, RiskLevel, ReviewStatus } from "@/lib/types";
-
-function toRiskLevel(score: number): RiskLevel {
-  if (score >= 85) return "critical";
-  if (score >= 65) return "high";
-  if (score >= 35) return "medium";
-  return "low";
-}
-
-function scoreFromText(content: string): number {
-  const low = content.toLowerCase();
-  let score = 15;
-  if (low.includes("scam")) score += 35;
-  if (low.includes("never") || low.includes("worst")) score += 20;
-  if ((content.match(/!/g) ?? []).length > 2) score += 15;
-  return Math.min(score, 98);
-}
-
-function statusFromRisk(riskLevel: RiskLevel): ReviewStatus {
-  if (riskLevel === "critical" || riskLevel === "high") return "pending";
-  if (riskLevel === "medium") return "flagged";
-  return "legitimate";
-}
+import {
+  detectFakeReview,
+  type DetectionReviewInput,
+} from "@/lib/fake-review-detector";
+import type { Review, ReviewStatus, RiskLevel } from "@/lib/types";
 
 function avatarFromName(name: string): string {
   return name
@@ -48,7 +30,7 @@ export async function GET(request: NextRequest) {
 
   const shouldSync = request.nextUrl.searchParams.get("sync") === "true";
 
-  let reviews: Review[] = [];
+  const reviewsById = new Map<string, Review>();
 
   const { data: existingReviews } = await auth.supabase
     .from("reviews")
@@ -66,7 +48,18 @@ export async function GET(request: NextRequest) {
     (verificationRows ?? []).map((item) => [item.review_id, item])
   );
 
-  reviews =
+  const historicalForDetection: DetectionReviewInput[] =
+    existingReviews?.map((row) => ({
+      id: row.id,
+      author: row.author_name ?? "Unknown",
+      rating: Number(row.rating ?? 0),
+      content: row.comment ?? "",
+      createdAt: row.created_at ?? new Date().toISOString(),
+      platform: row.platform ?? "Google",
+      location: row.location_name ?? "Unknown Location",
+    })) ?? [];
+
+  const storedReviews =
     existingReviews?.map((row) => {
       const verification = verificationMap.get(row.id);
 
@@ -91,36 +84,79 @@ export async function GET(request: NextRequest) {
     };
     }) ?? [];
 
+  for (const review of storedReviews) {
+    reviewsById.set(review.id, review);
+  }
+
   if (shouldSync) {
     const connections = await getUserConnections(auth.user.id);
 
+    const alertRows: Array<{
+      user_id: string;
+      type: "suspicious";
+      title: string;
+      description: string;
+      severity: "critical" | "high";
+      review_id: string;
+      read: boolean;
+      created_at: string;
+    }> = [];
+
     for (const connection of connections) {
       const googleReviews = await fetchGoogleReviews(connection);
+      googleReviews.sort((a, b) => {
+        const aTime = new Date(a.createTime ?? 0).getTime();
+        const bTime = new Date(b.createTime ?? 0).getTime();
+        return aTime - bTime;
+      });
 
       for (const googleReview of googleReviews) {
         const content = googleReview.comment ?? "";
-        const riskScore = scoreFromText(content);
-        const riskLevel = toRiskLevel(riskScore);
+        const reviewId = `${connection.location_id}-${googleReview.reviewId}`;
+        const createdAt = googleReview.createTime ?? new Date().toISOString();
+        const locationName = connection.location_name ?? connection.location_id;
+
+        const detection = detectFakeReview(
+          {
+            id: reviewId,
+            author: googleReview.reviewer?.displayName ?? "Google User",
+            rating: Number(googleReview.starRating ?? 0),
+            content,
+            createdAt,
+            platform: "Google",
+            location: locationName,
+          },
+          { recentReviews: historicalForDetection }
+        );
 
         const mappedReview: Review = {
-          id: `${connection.location_id}-${googleReview.reviewId}`,
+          id: reviewId,
           author: googleReview.reviewer?.displayName ?? "Google User",
           avatar: avatarFromName(googleReview.reviewer?.displayName ?? "Google User"),
           rating: Number(googleReview.starRating ?? 0),
           content,
-          date: toHumanDate(googleReview.createTime),
+          date: toHumanDate(createdAt),
           platform: "Google",
-          location: connection.location_name ?? connection.location_id,
-          riskScore,
-          riskLevel,
-          status: statusFromRisk(riskLevel),
-          detection: "Google ingestion with heuristic risk scoring",
+          location: locationName,
+          riskScore: detection.riskScore,
+          riskLevel: detection.riskLevel,
+          status: detection.status,
+          detection: detection.detectionReason,
           accountId: connection.account_id,
           locationId: connection.location_id,
           googleReviewId: googleReview.reviewId,
         };
 
-        reviews.push(mappedReview);
+        reviewsById.set(mappedReview.id, mappedReview);
+        historicalForDetection.unshift({
+          id: mappedReview.id,
+          author: mappedReview.author,
+          rating: mappedReview.rating,
+          content: mappedReview.content,
+          createdAt,
+          platform: mappedReview.platform,
+          location: mappedReview.location,
+        });
 
         await auth.supabase.from("reviews").upsert(
           {
@@ -129,7 +165,7 @@ export async function GET(request: NextRequest) {
             author_name: mappedReview.author,
             rating: mappedReview.rating,
             comment: mappedReview.content,
-            created_at: googleReview.createTime ?? new Date().toISOString(),
+            created_at: createdAt,
             platform: mappedReview.platform,
             location_name: mappedReview.location,
             risk_score: mappedReview.riskScore,
@@ -142,10 +178,29 @@ export async function GET(request: NextRequest) {
           },
           { onConflict: "id" }
         );
+
+        if (mappedReview.riskScore >= 65) {
+          const severity = mappedReview.riskScore >= 85 ? "critical" : "high";
+          alertRows.push({
+            user_id: auth.user.id,
+            type: "suspicious",
+            title: "Suspicious review detected",
+            description: `${mappedReview.author} posted a ${mappedReview.riskScore}% risk review at ${mappedReview.location}.`,
+            severity,
+            review_id: mappedReview.id,
+            read: false,
+            created_at: new Date().toISOString(),
+          });
+        }
       }
+    }
+
+    if (alertRows.length > 0) {
+      await auth.supabase.from("alerts").insert(alertRows);
     }
   }
 
+  const reviews = Array.from(reviewsById.values());
   reviews.sort((a, b) => b.riskScore - a.riskScore);
 
   return NextResponse.json({ reviews });
