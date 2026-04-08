@@ -44,6 +44,9 @@ export default function SignUpPage() {
       options: {
         data: {
           full_name: fullName,
+          onboarding_required: true,
+          onboarding_completed: false,
+          setup_completed: false,
         },
       },
     });
@@ -55,7 +58,7 @@ export default function SignUpPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push("/onboarding?step=questions");
     router.refresh();
   };
 
@@ -69,7 +72,7 @@ export default function SignUpPage() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${origin}/dashboard`,
+        redirectTo: `${origin}/onboarding?source=signup-google&step=questions`,
       },
     });
   };

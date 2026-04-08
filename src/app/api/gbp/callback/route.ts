@@ -23,8 +23,11 @@ export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const cookieState = request.cookies.get("gbp_oauth_state")?.value;
 
+  const postConnectPath = request.cookies.get("gbp_post_connect_path")?.value ?? "/dashboard/settings";
+
   if (!code || !state || !cookieState || state !== cookieState) {
-    const redirect = new URL("/dashboard/settings?gbp=error", request.url);
+    const redirect = new URL(postConnectPath, request.url);
+    redirect.searchParams.set("gbp", "error");
     return NextResponse.redirect(redirect);
   }
 
@@ -69,12 +72,19 @@ export async function GET(request: NextRequest) {
       await supabase.from("gbp_connections").insert(rows);
     }
 
-    const redirect = new URL(`/dashboard/settings?gbp=connected&locations=${rows.length}`, request.url);
+    const redirect = new URL(postConnectPath, request.url);
+    redirect.searchParams.set("gbp", "connected");
+    redirect.searchParams.set("locations", String(rows.length));
     const response = NextResponse.redirect(redirect);
     response.cookies.delete("gbp_oauth_state");
+    response.cookies.delete("gbp_post_connect_path");
     return response;
   } catch {
-    const redirect = new URL("/dashboard/settings?gbp=error", request.url);
-    return NextResponse.redirect(redirect);
+    const redirect = new URL(postConnectPath, request.url);
+    redirect.searchParams.set("gbp", "error");
+    const response = NextResponse.redirect(redirect);
+    response.cookies.delete("gbp_oauth_state");
+    response.cookies.delete("gbp_post_connect_path");
+    return response;
   }
 }

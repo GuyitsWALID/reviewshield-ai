@@ -20,6 +20,7 @@ You can copy from `.env.example` and fill values.
 Run the SQL migration in Supabase SQL editor:
 
 - `supabase/migrations/20260408_init_reviewshield.sql`
+- `supabase/migrations/20260408_user_onboarding.sql`
 
 This creates all required tables, indexes, and Row Level Security policies.
 
@@ -32,6 +33,7 @@ The current integration expects these tables (with RLS enabled by `user_id`):
 3. `alerts`
 4. `evidence_packages`
 5. `review_verifications`
+6. `user_onboarding`
 
 ### Minimal fields
 
@@ -90,6 +92,19 @@ The current integration expects these tables (with RLS enabled by `user_id`):
 - `updated_at` timestamptz
 - unique index on (`user_id`, `review_id`)
 
+`user_onboarding`
+- `user_id` uuid primary key
+- `business_name` text
+- `industry` text
+- `team_size` text
+- `monthly_review_volume` text
+- `primary_goal` text
+- `biggest_challenge` text
+- `onboarding_completed` boolean
+- `setup_completed` boolean
+- `created_at` timestamptz
+- `updated_at` timestamptz
+
 ## Available API Endpoints
 
 - `GET /api/dashboard/summary`
@@ -103,3 +118,5 @@ The current integration expects these tables (with RLS enabled by `user_id`):
 - `POST /api/reviews/:reviewId/report`
 - `POST /api/reviews/:reviewId/customer-verify`
 - `GET /api/evidence/:reviewId` (PDF export)
+- `GET /api/onboarding`
+- `POST /api/onboarding`

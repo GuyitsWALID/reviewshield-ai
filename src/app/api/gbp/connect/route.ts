@@ -14,12 +14,21 @@ export async function GET(request: NextRequest) {
   }
 
   const origin = request.nextUrl.origin;
+  const from = request.nextUrl.searchParams.get("from");
   const redirectUri = `${origin}/api/gbp/callback`;
   const state = crypto.randomUUID();
   const oauthUrl = buildGbpOAuthUrl({ redirectUri, state });
 
   const response = NextResponse.redirect(oauthUrl);
   response.cookies.set("gbp_oauth_state", state, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 15,
+  });
+
+  response.cookies.set("gbp_post_connect_path", from === "onboarding" ? "/onboarding?step=setup" : "/dashboard/settings", {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
