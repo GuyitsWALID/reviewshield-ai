@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,15 @@ interface OnboardingProfile {
   setup_completed: boolean;
 }
 
-export default function OnboardingPage() {
+function OnboardingPageFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <Loader2 className="h-6 w-6 animate-spin text-slate-600" />
+    </div>
+  );
+}
+
+function OnboardingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
@@ -387,5 +395,13 @@ export default function OnboardingPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<OnboardingPageFallback />}>
+      <OnboardingPageContent />
+    </Suspense>
   );
 }
