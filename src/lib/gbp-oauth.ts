@@ -1,3 +1,5 @@
+import { requireGoogleOAuthEnv } from "@/lib/env";
+
 interface GoogleTokenResponse {
   access_token: string;
   expires_in: number;
@@ -18,14 +20,7 @@ interface GoogleLocation {
 }
 
 function requireGoogleEnv() {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-
-  if (!clientId || !clientSecret) {
-    throw new Error("Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET");
-  }
-
-  return { clientId, clientSecret };
+  return requireGoogleOAuthEnv();
 }
 
 export function buildGbpOAuthUrl(params: {

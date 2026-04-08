@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Shield } from "lucide-react";
+import { GoogleIcon } from "@/components/google-icon";
+import { CheckCircle2, Shield } from "lucide-react";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function SignUpPage() {
     setError(null);
 
     if (!supabase) {
-      setError("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+      setError("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and a public Supabase key.");
       return;
     }
 
@@ -60,7 +61,7 @@ export default function SignUpPage() {
 
   const handleGoogleSignUp = async () => {
     if (!supabase) {
-      setError("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+      setError("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and a public Supabase key.");
       return;
     }
 
@@ -74,15 +75,15 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-indigo-100 p-6">
-      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md items-center">
-        <Card className="w-full border-slate-200 shadow-md">
-          <CardHeader className="space-y-2 text-center">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
-              <Shield className="h-5 w-5 text-white" />
-            </div>
-            <CardTitle>Create your account</CardTitle>
-            <CardDescription>Start protecting your business from fake reviews</CardDescription>
+    <div className="relative min-h-screen overflow-hidden bg-slate-50 px-6 py-8">
+      <div className="pointer-events-none absolute -left-36 top-[-6rem] h-80 w-80 rounded-full bg-emerald-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 bottom-[-6rem] h-80 w-80 rounded-full bg-orange-200/40 blur-3xl" />
+
+      <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center gap-6 lg:grid-cols-2">
+        <Card className="order-2 w-full border-slate-200 bg-white/90 shadow-lg backdrop-blur lg:order-1">
+          <CardHeader className="space-y-2">
+            <CardTitle className="text-2xl">Create your account</CardTitle>
+            <CardDescription>Use email and password, or continue with Google to get started quickly.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <form className="space-y-4" onSubmit={handleSubmit}>
@@ -134,16 +135,61 @@ export default function SignUpPage() {
                 I agree to the Terms of Service and Privacy Policy
               </label>
               {error ? <p className="text-sm text-red-600">{error}</p> : null}
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
+              <Button type="submit" className="w-full bg-slate-900 text-white hover:bg-slate-800" disabled={loading}>
                 {loading ? "Creating account..." : "Create Account"}
               </Button>
             </form>
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignUp}>Continue with Google</Button>
+
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase tracking-wide text-slate-400">
+                <span className="bg-white px-2">or</span>
+              </div>
+            </div>
+
+            <Button variant="outline" className="w-full gap-2" onClick={handleGoogleSignUp}>
+              <GoogleIcon className="h-4 w-4" />
+              Continue with Google
+            </Button>
+
             <p className="text-center text-sm text-slate-600">
-              Already have an account? <Link href="/sign-in" className="text-indigo-600 hover:text-indigo-700">Sign In</Link>
+              Already have an account? <Link href="/sign-in" className="font-medium text-slate-900 hover:text-slate-700">Sign In</Link>
             </p>
           </CardContent>
         </Card>
+
+        <div className="order-1 rounded-2xl border border-slate-200 bg-white/70 p-8 shadow-sm backdrop-blur lg:order-2">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+              <Shield className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">ReviewShield AI</p>
+              <p className="text-xs text-slate-500">Reputation defense system</p>
+            </div>
+          </div>
+          <h2 className="text-3xl font-semibold tracking-tight text-slate-900">Build trust from day one.</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            Connect your business profile, detect suspicious reviews instantly, and keep your public reputation protected.
+          </p>
+
+          <div className="mt-6 space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+            <p className="flex items-center gap-2 text-sm text-slate-700">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              Google Business Profile connection
+            </p>
+            <p className="flex items-center gap-2 text-sm text-slate-700">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              Real-time suspicious review alerts
+            </p>
+            <p className="flex items-center gap-2 text-sm text-slate-700">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              Evidence package export for reports
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

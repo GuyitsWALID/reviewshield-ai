@@ -6,10 +6,22 @@ Create a `.env.local` file with:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=
+# Use either key variable (both are supported by the app)
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 ```
+
+You can copy from `.env.example` and fill values.
+
+## Database Setup (Supabase)
+
+Run the SQL migration in Supabase SQL editor:
+
+- `supabase/migrations/20260408_init_reviewshield.sql`
+
+This creates all required tables, indexes, and Row Level Security policies.
 
 ## Supabase Tables Expected
 

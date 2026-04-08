@@ -2,30 +2,23 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Shield } from "lucide-react";
+import { GoogleIcon } from "@/components/google-icon";
+import { Shield, Sparkles } from "lucide-react";
 
 export default function SignInPage() {
   const router = useRouter();
-  const [nextPath, setNextPath] = useState("/dashboard");
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      setNextPath(url.searchParams.get("next") || "/dashboard");
-    }
-  }, []);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -50,13 +43,16 @@ export default function SignInPage() {
       return;
     }
 
+    const url = new URL(window.location.href);
+    const nextPath = url.searchParams.get("next") || "/dashboard";
+
     router.push(nextPath);
     router.refresh();
   };
 
   const handleGoogleSignIn = async () => {
     if (!supabase) {
-      setError("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+      setError("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and a public Supabase key.");
       return;
     }
 
@@ -70,15 +66,38 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-indigo-100 p-6">
-      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md items-center">
-        <Card className="w-full border-slate-200 shadow-md">
-          <CardHeader className="space-y-2 text-center">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
-              <Shield className="h-5 w-5 text-white" />
+    <div className="relative min-h-screen overflow-hidden bg-slate-50 px-6 py-8">
+      <div className="pointer-events-none absolute -left-36 top-[-6rem] h-80 w-80 rounded-full bg-emerald-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 bottom-[-6rem] h-80 w-80 rounded-full bg-orange-200/40 blur-3xl" />
+
+      <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center gap-6 lg:grid-cols-2">
+        <div className="hidden rounded-2xl border border-slate-200 bg-white/70 p-8 shadow-sm backdrop-blur lg:block">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+              <Shield className="h-5 w-5" />
             </div>
-            <CardTitle>Welcome Back</CardTitle>
-            <CardDescription>Sign in to continue monitoring your reputation</CardDescription>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">ReviewShield AI</p>
+              <p className="text-xs text-slate-500">Reputation defense system</p>
+            </div>
+          </div>
+          <h2 className="text-3xl font-semibold tracking-tight text-slate-900">Protect every location, every day.</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            Detect suspicious Google reviews, collect evidence, and respond faster with one focused workflow.
+          </p>
+          <div className="mt-8 rounded-xl border border-slate-200 bg-white p-4">
+            <p className="flex items-center gap-2 text-sm font-medium text-slate-800">
+              <Sparkles className="h-4 w-4 text-emerald-600" />
+              Live fake-review detection enabled
+            </p>
+            <p className="mt-2 text-xs text-slate-500">Sign in to continue scanning and alerting across your connected GBP locations.</p>
+          </div>
+        </div>
+
+        <Card className="w-full border-slate-200 bg-white/90 shadow-lg backdrop-blur">
+          <CardHeader className="space-y-2">
+            <CardTitle className="text-2xl">Welcome back</CardTitle>
+            <CardDescription>Sign in with email and password, or continue with Google.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <form className="space-y-4" onSubmit={handleSubmit}>
@@ -111,13 +130,27 @@ export default function SignInPage() {
                 <Link href="#" className="text-indigo-600 hover:text-indigo-700">Forgot password?</Link>
               </div>
               {error ? <p className="text-sm text-red-600">{error}</p> : null}
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
+              <Button type="submit" className="w-full bg-slate-900 text-white hover:bg-slate-800" disabled={loading}>
                 {loading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>Continue with Google</Button>
+
+            <div className="relative py-1">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase tracking-wide text-slate-400">
+                <span className="bg-white px-2">or</span>
+              </div>
+            </div>
+
+            <Button variant="outline" className="w-full gap-2" onClick={handleGoogleSignIn}>
+              <GoogleIcon className="h-4 w-4" />
+              Continue with Google
+            </Button>
+
             <p className="text-center text-sm text-slate-600">
-              Don&apos;t have an account? <Link href="/sign-up" className="text-indigo-600 hover:text-indigo-700">Sign Up</Link>
+              Don&apos;t have an account? <Link href="/sign-up" className="font-medium text-slate-900 hover:text-slate-700">Sign Up</Link>
             </p>
           </CardContent>
         </Card>
